@@ -2,7 +2,7 @@ import sys
 
 import matplotlib
 from PyQt6.QtCore import QSize, QDateTime, QTimer
-from PyQt6.QtGui import QFont
+from PyQt6.QtGui import QFont, QShortcut, QKeySequence
 from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QDateTimeEdit, QPushButton, QDialog, QWidget, \
     QVBoxLayout
 import mysql.connector
@@ -54,6 +54,10 @@ class MainWindow(QMainWindow):
         self.save_button.move(150, 250)
         self.save_button.clicked.connect(self.save_data)
 
+        # 回车键保存数据
+        self.save_shortcut = QShortcut(QKeySequence("Return"), self)
+        self.save_shortcut.activated.connect(self.save_data)
+
 
 
 
@@ -63,7 +67,7 @@ class MainWindow(QMainWindow):
         chapter = self.chapter.text()
         question_num = self.question_num.text()
         error_num = self.error_num.text()
-        accuracy = round((1 - int(error_num) / int(question_num)),2)
+        accuracy = round((1 - int(error_num) / int(question_num))*100,2)
         print("时间：", time,"正在连接数据库......")
         # 数据库连接
         mydb = mysql.connector.connect(
@@ -81,9 +85,11 @@ class MainWindow(QMainWindow):
         insert_value = (time, chapter, question_num, error_num, accuracy)
         mycursor.execute(insert_query, insert_value)
 
+
         # 数据库提交
         mydb.commit()
         print("数据插入成功！")
+
         # 关闭数据库
         mycursor.close()
         mydb.close()
